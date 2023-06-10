@@ -35,9 +35,31 @@ async function run() {
     await client.connect();
    
     const AllClassCollection = client.db("Mindful_blissdb").collection("classAll");
+    const AllPurchaseCollection = client.db("Mindful_blissdb").collection("purchase");
+
+// class purchase collection
+
+app.get('/purchase',async(req,res)=>{
+    const email=req.query.email;
+    if(!email){
+        res.send([]);
+    }
+    const query ={email:email};
+    const result = await AllPurchaseCollection.find(query).toArray();
+    res.send(result)
+})
+
+
+app.post('/purchase', async(req,res)=>{
+    const newItem = req.body;
+    console.log(newItem)
+    const result =await AllPurchaseCollection.insertOne(newItem)
+    res.send(result)
+  })
 
 
 
+//   all classes here
     app.post('/allClasses', async(req,res)=>{
         const newItem = req.body;
         const result =await AllClassCollection.insertOne(newItem)
