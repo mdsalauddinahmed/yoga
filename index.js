@@ -37,13 +37,25 @@ async function run() {
     const AllClassCollection = client.db("Mindful_blissdb").collection("classAll");
     const AllPurchaseCollection = client.db("Mindful_blissdb").collection("purchase");
     const AllUserCollection = client.db("Mindful_blissdb").collection("users");
+    const AllInstructorCollection = client.db("Mindful_blissdb").collection("instructor");
+
+
+
+// instructors
+app.get('/allInstructors',async(req,res) =>{
+    const result = await AllInstructorCollection.find().toArray();
+    res.send(result);
+     
+})
+
+
 
 //  users
 
 app.get('/users', async (req, res) => {
     const result = await AllUserCollection.find().toArray();
     res.send(result);
-    console.log(result)
+    
   });
 
 app.post("/users",async(req,res)=>{
@@ -59,7 +71,18 @@ app.post("/users",async(req,res)=>{
     res.send(result)
   })
 
-
+// 
+app.patch('/users/admin/:id',async(req,res)=>{
+    const id = req.params.id;
+    const filter ={_id:new ObjectId(id)};
+    const updateDoc = {
+      $set:{
+        role: 'admin'
+      }
+    };
+    const result = await AllUserCollection.updateOne(filter,updateDoc)
+    res.send(result)
+  })
 
 
 
