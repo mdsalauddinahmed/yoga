@@ -103,6 +103,12 @@ app.post('/purchase', async(req,res)=>{
         const result = await AllClassCollection.find().toArray();
         res.send(result)
     })
+    app.delete("/allClasses/:id",async (req,res)=>{
+        const id = req.params.id;
+        const query ={ _id:new ObjectId(id)};
+        const result =await AllClassCollection.deleteOne(query)
+        res.send(result)
+      })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
