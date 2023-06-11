@@ -16,7 +16,7 @@ app.use(express.json());
 // mongoDb integration
  
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.USER_MONGODB}:${process.env.USER_PASS}@cluster0.xcj5skh.mongodb.net/?retryWrites=true&w=majority`;
  
 
@@ -57,6 +57,13 @@ app.post('/purchase', async(req,res)=>{
     res.send(result)
   })
 
+  
+  app.delete("/purchase/:id",async (req,res)=>{
+    const id = req.params.id;
+    const query ={ _id:new ObjectId(id)};
+    const result =await cartCollection.deleteOne(query)
+    res.send(result)
+  })
 
 
 //   all classes here
