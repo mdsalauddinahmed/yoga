@@ -36,6 +36,32 @@ async function run() {
    
     const AllClassCollection = client.db("Mindful_blissdb").collection("classAll");
     const AllPurchaseCollection = client.db("Mindful_blissdb").collection("purchase");
+    const AllUserCollection = client.db("Mindful_blissdb").collection("users");
+
+//  users
+
+app.get('/users', async (req, res) => {
+    const result = await AllUserCollection.find().toArray();
+    res.send(result);
+    console.log(result)
+  });
+
+app.post("/users",async(req,res)=>{
+    const user = req.body;
+   
+    const query = {email:user.email}
+    const existingUser = await AllUserCollection.findOne(query);
+      console.log('exit',existingUser)
+    if(existingUser){
+      return res.send({message:"user already exists"})
+    }
+    const result = await AllUserCollection.insertOne(user)
+    res.send(result)
+  })
+
+
+
+
 
 // class purchase collection
 
@@ -61,7 +87,7 @@ app.post('/purchase', async(req,res)=>{
   app.delete("/purchase/:id",async (req,res)=>{
     const id = req.params.id;
     const query ={ _id:new ObjectId(id)};
-    const result =await cartCollection.deleteOne(query)
+    const result =await AllPurchaseCollection.deleteOne(query)
     res.send(result)
   })
 
