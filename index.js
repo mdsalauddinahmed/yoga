@@ -1,7 +1,7 @@
 const express = require('express');
 const cors=require('cors')
  const app =express()
- 
+ const jwt = require('jsonwebtoken');
  require('dotenv').config()
 
  
@@ -112,7 +112,7 @@ app.get('/purchase',async(req,res)=>{
 
 app.post('/purchase', async(req,res)=>{
     const newItem = req.body;
-    console.log(newItem)
+    
     const result =await AllPurchaseCollection.insertOne(newItem)
     res.send(result)
   })
