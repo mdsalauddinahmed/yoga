@@ -88,6 +88,8 @@ app.get('/users', async (req, res) => {
     
   });
 
+
+
 app.post("/users",async(req,res)=>{
     const user = req.body;
    
@@ -102,6 +104,23 @@ app.post("/users",async(req,res)=>{
   })
 
 // 
+app.get('/users/admin/:email',verifyJwt,async(req,res)=>{
+  
+  const email= req.params.email;
+  if(req.decoded.email !== email){
+    res.send({admin:false})
+  }
+  const query ={email:email}
+  const user = await AllInstructorCollection.findOne(query)
+  const result = {admin: user?.role === "admin"}
+  res.send(result)
+})
+
+
+
+
+
+
 app.patch('/users/admin/:id',async(req,res)=>{
     const id = req.params.id;
     const filter ={_id:new ObjectId(id)};
@@ -113,6 +132,9 @@ app.patch('/users/admin/:id',async(req,res)=>{
     const result = await AllUserCollection.updateOne(filter,updateDoc)
     res.send(result)
   })
+
+
+
 app.patch('/users/instructor/:id',async(req,res)=>{
     const id = req.params.id;
     const filter ={_id:new ObjectId(id)};
@@ -124,6 +146,10 @@ app.patch('/users/instructor/:id',async(req,res)=>{
     const result = await AllUserCollection.updateOne(filter,updateDoc)
     res.send(result)
   })
+
+
+
+
 
 
 
