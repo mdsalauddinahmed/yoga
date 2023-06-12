@@ -4,14 +4,35 @@ const cors=require('cors')
  const jwt = require('jsonwebtoken');
  require('dotenv').config()
 
- 
+ const  stripe =require("stripe")('process.env.PAYMENT_KEY')
 const port = process.env.PORT || 5100;
 
 // middleware
 app.use(cors());
 app.use(express.json());
 
+// verify token
 
+const verifyJwt =(req,res,next)=>{
+  const authorization = req.headers.authorization;
+  if(!authorization){
+    return res.status(401).send({error:true,message :'unauthorized'});
+  }
+
+  const token = authorization.split(' ')[1];
+  jwt.verify(token, process.env.PAYMENT_KEY,(err,decoded)=>{
+    if(err){
+      return res.status(401).send({error:true,message:'unauthorized access'})
+    }
+    req.decoded =decoded;
+    next()
+  })
+
+
+
+}
+
+  // 
 
 // mongoDb integration
  
@@ -38,6 +59,15 @@ async function run() {
     const AllPurchaseCollection = client.db("Mindful_blissdb").collection("purchase");
     const AllUserCollection = client.db("Mindful_blissdb").collection("users");
     const AllInstructorCollection = client.db("Mindful_blissdb").collection("instructor");
+
+// 
+app.post('/jwt',(req,res)=>{
+  const user= req.body;
+  const token =jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{
+    expiresIn:'1h'
+  })
+  res.send({token})
+})
 
 
 
@@ -99,11 +129,16 @@ app.patch('/users/instructor/:id',async(req,res)=>{
 
 // class purchase collection
 
-app.get('/purchase',async(req,res)=>{
+app.get('/purchase',verifyJwt,async(req,res)=>{
     const email=req.query.email;
     if(!email){
         res.send([]);
     }
+    const decodedEmail = req.decoded.email;
+    if(email !== decodedEmail){
+      return res.status(403).send({error:true,message:' forbidden  access'})
+    }
+
     const query ={email:email};
     const result = await AllPurchaseCollection.find(query).toArray();
     res.send(result)
@@ -142,6 +177,21 @@ app.post('/purchase', async(req,res)=>{
         const query ={ _id:new ObjectId(id)};
         const result =await AllClassCollection.deleteOne(query)
         res.send(result)
+      })
+
+
+      // create payment intent
+      app.post('/create-payment-intent',async(req,res)=>{
+        const {Price}=req.body;
+        const amount =Price*100;
+        const paymentIntent = await stripe.paymentIntent.create({
+          amount :amount,
+          currency:'usd',
+          payment_method_types:['card']
+        });
+        res.send({
+          clientSecret: paymentIntent.client_secret
+        })
       })
 
     // Send a ping to confirm a successful connection
